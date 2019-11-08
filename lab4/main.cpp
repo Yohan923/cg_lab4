@@ -22,6 +22,12 @@
 #include "glm/glm.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <GameObject.h>
+#include <Input.h>
+#include <Transform.h>
+#include <Camera.h>
+#include <GameObjectManager.h>
+
 
 
 /*----------------------------------------------------------------------------
@@ -29,7 +35,7 @@ MESH TO LOAD
 ----------------------------------------------------------------------------*/
 // this mesh is a dae file format but you should be able to use any other format too, obj is typically what is used
 // put the mesh in your project directory, or provide a filepath for it here
-#define MESH_NAME "../lab4/resources/models/Koltuk.3ds"
+#define MESH_NAME "../lab4/resources/models/350zrelease.3ds"
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
 
@@ -48,45 +54,22 @@ GLuint shaderProgramID;
 
 ModelData mesh_data;
 unsigned int mesh_vao = 0;
-int width = 800;
-int height = 600;
+int width = 1024;
+int height = 768;
+GLint loc1, loc2, loc3;
 
-GLuint loc1, loc2, loc3;
-GLfloat transX, transY, transZ;
-GLfloat scaleX, scaleY, scaleZ;
-GLfloat rotX, rotY, rotZ;
-GLboolean ortho;
-GLboolean combi;
-GLboolean upward;
+float elapsedSeconds = 0;
+float totalSeconds = 0;
+bool nextRunning = true;
+bool running = true;
+long long elapsedTicks;
+long long totalTicks;
+float timeRatio;
+float prevElapsedSeconds;
+float previousTotalSeconds;
 
-glm::vec3 position;
-GLfloat horizontalAngle;
-GLfloat verticalAngle;
-glm::vec3 direction;
-glm::vec3 rightSide;
-glm::vec3 up;
-
-glm::vec4 transMat;
-glm::vec4 scaleMat;
-glm::vec4 rotateMat;
-
-// Initial Field of View
-GLfloat fov = 45.0f;
-GLfloat rotSpeed = 1.0f;
-GLfloat cameraSpeed = 2.0f;
-GLfloat transSpeed = 3.0f;
-GLfloat scaleSpeed = 0.5f;
-GLfloat mouseSpeed = 0.005f;
-
-GLfloat getDelta() {
-	static DWORD last_time = 0;
-	DWORD curr_time = timeGetTime();
-	if (last_time == 0)
-		last_time = curr_time;
-	float delta = (curr_time - last_time) * 0.08f;
-	last_time = curr_time;
-	return delta;
-}
+void display();
+void updateTime();
 
 
 #pragma region MESH LOADING
@@ -299,307 +282,37 @@ void generateObjectBufferMesh() {
 }
 #pragma endregion VBO_FUNCTIONS
 
+void initScene() {
+	auto* cameraObject = new GameObject();
+	cameraObject->transform->position = glm::vec3(8, 4, 8);
 
-void display() {
-	getDelta();
-	// tell GL to only draw onto a pixel if the shape is closer to the viewer
-	glEnable(GL_DEPTH_TEST); // enable depth-testing
-	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(shaderProgramID);
+	// Camera
+	auto* camera = new Camera();
+	cameraObject->addComponent(camera);
 
-	//Declare your uniform variables that will be used in your shader
-	int matrix_location = glGetUniformLocation(shaderProgramID, "model");
-	int view_mat_location = glGetUniformLocation(shaderProgramID, "view");
-	int proj_mat_location = glGetUniformLocation(shaderProgramID, "proj");
-
-	// Root of the Hierarchy
-	glm::mat4 scaler = glm::scale(glm::mat4(1.0f), glm::vec3(scaleX, scaleY, scaleZ));
-	glm::mat4 rotator = glm::rotate(glm::mat4(1.0f), rotX, glm::vec3(1.0f, 0.0f, 0.0f));
-	rotator = glm::rotate(rotator, rotY, glm::vec3(0.0f, 1.0f, 0.0f));
-	rotator = glm::rotate(rotator, rotZ, glm::vec3(0.0f, 0.0f, 1.0f));
-	glm::mat4 translator = glm::translate(glm::mat4(1.0f), glm::vec3(transX, transY, transZ));
-	glm::mat4 model = translator * rotator * scaler;
-	glm::mat4 view = glm::lookAt(
-		position,           // Camera is here
-		position + direction, // and looks here : at the same position, plus "direction"
-		up                  // Head is up (set to 0,-1,0 to look upside-down)
-	);
-	glm::mat4 projection;
-	if (ortho) {
-		projection = glm::ortho(3.0f, -3.0f, -3.0f, 3.0f, 0.1f, 100.0f);
-	}
-	else {
-		projection = glm::perspective(fov, (float)width / (float)height, 0.1f, 100.0f);
-	}
-
-	// update uniforms & draw
-	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, &projection[0][0]);
-	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, &model[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
-
-	// Set up the child matrix
-	// glm::mat4 modelChild = glm::mat4(1.0);
-	// modelChild = glm::translate(modelChild, glm::vec3(0.0f, 1.9f, 0.0f));
-
-	// Apply the root matrix to the child matrix
-	// modelChild = model * modelChild;
-
-	// Update the appropriate uniform and draw the mesh again
-	// glUniformMatrix4fv(matrix_location, 1, GL_FALSE, &modelChild[0][0]);
-	// glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
-
-	glutSwapBuffers();
+	camera->targetPos = glm::vec3(0, 0, 0);
+	camera->fov = 45;
+	camera->aspect = (float)width / height;
+	camera->nearClipPlane = 0.01f;
+	camera->farClipPlane = 1000.f;
 }
 
-void updateScene() {
-
-	if (combi) {
-		GLfloat delta = getDelta() * 0.001;
-		
-		if (upward) {
-			transY += delta * transSpeed;
-			rotX += rotSpeed * delta * 50;
-			rotX = fmodf(rotX, 360.0f);
-			scaleX += delta * scaleSpeed * 2;
-			scaleY += delta * scaleSpeed * 2;
-			scaleZ += delta * scaleSpeed * 2;
-		}
-		else {
-			transY -= delta * transSpeed;
-			rotX -= rotSpeed * delta * 50;
-			rotX = fmodf(rotX, 360.0f);
-			scaleX = max(0.0f, scaleX - (delta * scaleSpeed * 2));
-			scaleY = max(0.0f, scaleY - (delta * scaleSpeed * 2));
-			scaleZ = max(0.0f, scaleZ - (delta * scaleSpeed * 2));
-		}
-	}
-
-	// Draw the next frame
-	glutPostRedisplay();
-}
-
-
-void init()
+void initObjects()
 {
-	// Set up the shaders
-	GLuint shaderProgramID = CompileShaders();
-	// load mesh into a vertex buffer array
-	generateObjectBufferMesh();
+	Input::init();
 
-	transX = transY = transZ = 0.0f;
-	scaleX = scaleY = scaleZ = 1.0f;
-	rotX = rotY = rotZ = 0.0f;
-	ortho = false;
-	combi = false;
-	upward = false;
-
-	position = glm::vec3(0.0f, 0.0f, 5.0f);
-	horizontalAngle = 3.14f;
-	verticalAngle = 0.0f;
-
-	direction = glm::vec3(
-		cos(verticalAngle) * sin(horizontalAngle),
-		sin(verticalAngle),
-		cos(verticalAngle) * cos(horizontalAngle)
-	);
-	rightSide = glm::vec3(
-		sin(horizontalAngle - 3.14f / 2.0f),
-		0,
-		cos(horizontalAngle - 3.14f / 2.0f)
-	);
-
-	up = glm::cross(rightSide, direction);
+	previousTotalSeconds = 0;
 }
 
-// Placeholder code for the keypress
-void keypress(unsigned char key, int x, int y) {
-
-	GLfloat delta = getDelta();
-	key = tolower(key);
-	bool shift = glutGetModifiers() == GLUT_ACTIVE_SHIFT;
-
-	switch (key) {
-		// ctrl + w
-	case '\x17':
-		rotY += rotSpeed * delta;
-		rotY = fmodf(rotY, 360.0f);
-		break;
-	case 'w':
-		if (shift) {
-			scaleY += delta * scaleSpeed;
-		}
-		else {
-			transY += delta * transSpeed;
-		}
-		break;
-		// ctrl + s
-	case '\x13':
-		rotY -= rotSpeed * delta;
-		rotY = fmodf(rotY, 360.0f);
-		break;
-	case 's':
-		if (shift) {
-			scaleY = max(0.0f, scaleY - (delta * scaleSpeed));
-		}
-		else {
-			transY -= delta * transSpeed;
-		}
-		break;
-		// ctrl + d
-	case '\4':
-		rotX += rotSpeed * delta;
-		rotX = fmodf(rotX, 360.0f);
-		break;
-	case 'd':
-		if (shift) {
-			scaleX += delta * scaleSpeed;
-		}
-		else {
-			transX += delta * transSpeed;
-		}
-		break;
-		// ctrl + a
-	case '\1':
-		rotX -= rotSpeed * delta;
-		rotX = fmodf(rotX, 360.0f);
-		break;
-	case 'a':
-		if (shift) {
-			scaleX = max(0.0f, scaleX - (delta * scaleSpeed));
-		}
-		else {
-			transX -= delta * transSpeed;
-		}
-		break;
-		// ctrl + q
-	case '\x11':
-		rotZ -= rotSpeed * delta;
-		rotZ = fmodf(rotZ, 360.0f);
-		break;
-	case 'q':
-		if (shift) {
-			scaleZ = max(0.0f, scaleZ - (delta * scaleSpeed));
-		}
-		else {
-			scaleX = max(0.0f, scaleX - (delta * scaleSpeed));
-			scaleY = max(0.0f, scaleY - (delta * scaleSpeed));
-			scaleZ = max(0.0f, scaleZ - (delta * scaleSpeed));
-		}
-		break;
-		// ctrl + e
-	case '\5':
-		rotZ += rotSpeed * delta;
-		rotZ = fmodf(rotZ, 360.0f);
-		break;
-	case 'e':
-		if (shift) {
-			scaleZ += delta * scaleSpeed;
-		}
-		else {
-			scaleX += delta * scaleSpeed;
-			scaleY += delta * scaleSpeed;
-			scaleZ += delta * scaleSpeed;
-		}
-		break;
-	case 'o':
-		ortho = true;
-		break;
-	case 'p':
-		ortho = false;
-		break;
-	case 'i':
-		combi = !combi;
-		break;
-	case 'u':
-		upward = !upward;
-		break;
-	case 27: // Escape key
-		glutDestroyWindow(glutGetWindow());
-		exit(0);
-		break;
-	}
-
-	glutPostRedisplay();
-}
-
-void specialKey(int key, int x, int y) {
-	GLfloat delta = getDelta();
-
-	switch (key)
-	{
-	case GLUT_KEY_UP:
-		position += direction * delta * cameraSpeed;
-		break;
-	case GLUT_KEY_DOWN:
-		position -= direction * delta * cameraSpeed;
-		break;
-	case GLUT_KEY_RIGHT:
-		position += rightSide * delta * cameraSpeed;
-		break;
-	case GLUT_KEY_LEFT:
-		position -= rightSide * delta * cameraSpeed;
-		break;
-	}
-
-	glutPostRedisplay();
-}
-
-void mouseMove(int x, int y) {
-
-	GLfloat delta = getDelta();
-
-	horizontalAngle += mouseSpeed * delta * float((width / 2) - x);
-	verticalAngle += mouseSpeed * delta * float((height / 2) - y);
-
-	direction = glm::vec3(
-		cos(verticalAngle) * sin(horizontalAngle),
-		sin(verticalAngle),
-		cos(verticalAngle) * cos(horizontalAngle)
-	);
-
-	rightSide = glm::vec3(
-		sin(horizontalAngle - 3.14f / 2.0f),
-		0,
-		cos(horizontalAngle - 3.14f / 2.0f)
-	);
-
-	up = glm::cross(rightSide, direction);
-
-	glutPostRedisplay();
-	glutWarpPointer(width / 2, height / 2);
-}
-
-void mouseScroll(int button, int dir, int x, int y) {
-	GLfloat delta = getDelta();
-
-	if (dir > 0) {
-		fov = min(46.0f, fov + (1 * delta));
-	}
-	else {
-		fov = max(44.0f, fov - (1 * delta));
-	}
-
-	glutPostRedisplay();
-}
-
-int main(int argc, char** argv) {
-
+int initOpenGl(int* argc, char** argv) {
 	// Set up the window
-	glutInit(&argc, argv);
+	glutInit(argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
 	glutCreateWindow("Hello Triangle");
 
-	// Tell glut where the display function is
 	glutDisplayFunc(display);
-	glutIdleFunc(updateScene);
-	glutKeyboardFunc(keypress);
-	glutSpecialFunc(specialKey);
-	glutPassiveMotionFunc(mouseMove);
-	glutMouseWheelFunc(mouseScroll);
+	glutIdleFunc(display);
 
 	// A call to glewInit() must be done after glut is initialized!
 	GLenum res = glewInit();
@@ -608,8 +321,71 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
 		return 1;
 	}
+}
+
+void update()
+{
+	updateTime();
+
+	Input::update();
+	GameObjectManager::update();
+
+	// exit game if press esc
+	if (Input::curr.keyDown[27]) glutLeaveMainLoop();
+}
+
+void updateTime()
+{
+	float newTotalSeconds = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+
+	if (nextRunning)
+	{
+		prevElapsedSeconds = elapsedSeconds;
+		elapsedSeconds = newTotalSeconds - previousTotalSeconds;
+		totalSeconds += elapsedSeconds;
+		elapsedTicks = (long long)(elapsedSeconds * 1e7);
+		totalTicks = elapsedTicks;
+		timeRatio = prevElapsedSeconds == 0 ? 0 : elapsedSeconds / prevElapsedSeconds;
+	}
+	else
+	{
+		elapsedSeconds = 0;
+		elapsedTicks = 0;
+		timeRatio = 0;
+	}
+
+	running = nextRunning;
+	previousTotalSeconds = newTotalSeconds;
+}
+
+void draw()
+{
+	GameObjectManager::draw();
+}
+
+bool getRunning()
+{
+	return running;
+}
+
+void display() {
+	update();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	draw();
+
+	glutSwapBuffers();
+}
+
+int main(int argc, char** argv) {
+
+	initOpenGl(&argc, argv);
+
 	// Set up your objects and shaders
-	init();
+	initObjects();
+
+	glutDisplayFunc(display);
+	glutIdleFunc(display);
 	// Begin infinite event loop
 	glutMainLoop();
 	return 0;
