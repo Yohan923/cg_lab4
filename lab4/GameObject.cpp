@@ -29,8 +29,21 @@ GameObject* GameObject::Instantiate(GameObject* original, glm::vec3& position, g
 
 void GameObject::addComponent(Component* component)
 {
+	component->beforeAttach(this);
 	component->gameObject = this;
+	component->transform = transform;
 	components.push_back(component);
+	component->afterAttach(this);
+}
+
+Component* GameObject::find(std::string name)
+{
+	for (auto* component : components)
+	{
+		if (component->name == name) return component;
+	}
+
+	return nullptr;
 }
 
 void GameObject::update()

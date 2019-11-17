@@ -12,6 +12,9 @@ class Component;
 class Renderer;
 class Transform;
 class Mesh;
+class MeshFilter;
+class MeshRenderer;
+class Camera;
 
 class GameObject : public Object
 {
@@ -22,13 +25,14 @@ public:
 	static GameObject* Instantiate(GameObject* original, glm::vec3& position, glm::quat &rotation);
 
 	void addComponent(Component* component);
+	Component* find(std::string name);
 
 	virtual void update() override;
 	virtual void draw() override;
 
 	Renderer* renderer;
 	Transform* transform;
-	Mesh* mesh;
+	std::vector<MeshFilter*> meshFilters;
 
 	std::list<Renderer*> renderers;
 

@@ -6,6 +6,8 @@
 class Input
 {
 public:
+	static float deltaTime;
+
 	static bool getKey(const char name);
 	static bool getKeyDown(const char name);
 	static bool getKeyUp(const char name);

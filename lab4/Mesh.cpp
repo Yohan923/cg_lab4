@@ -30,6 +30,20 @@ void Mesh::setVertices(vec3* value, int count)
 	}
 }
 
+void Mesh::setTextures(vec2* value, int count)
+{
+	int size = sizeof(vec2) * count;
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[Texture]);
+	glBufferData(GL_ARRAY_BUFFER, size, value, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(Texture);
+	glVertexAttribPointer(Texture, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR) {
+		throw err;
+	}
+}
+
 void Mesh::setTriangles(uvec3* value, int count)
 {
 	int size = sizeof(uvec3) * count;
@@ -89,6 +103,15 @@ void Mesh::bind()
 	glBindVertexArray(vao);
 }
 
+void Mesh::bindTexture(TextureType type) {
+	if (type == TwoD) {
+		glBindTexture(GL_TEXTURE_2D, texture);
+	}
+	else if (type == Box) {
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	}
+}
+
 void Mesh::setNormals(glm::vec3* value, int count)
 {
 	int size = sizeof(vec3) * count;
@@ -101,4 +124,9 @@ void Mesh::setNormals(glm::vec3* value, int count)
 	if (err != GL_NO_ERROR) {
 		throw err;
 	}
+}
+
+void Mesh::setTexture(GLuint id) {
+	bind();
+	texture = id;
 }

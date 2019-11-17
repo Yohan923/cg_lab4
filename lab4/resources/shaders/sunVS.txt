@@ -1,0 +1,17 @@
+#version 330
+
+in vec3 vertex_position;
+in vec4 vertex_color;
+in vec3 vertex_normal;
+in vec2 texture_coord;
+
+uniform mat4 _MATRIX_MVP;
+uniform mat4 _ModelMatrix;
+
+out vec2 TexCoord;
+
+void main(){
+    gl_Position = _MATRIX_MVP * vec4(vertex_position, 1.0);                                       
+    TexCoord   = texture_coord;                                                                               
+}
+

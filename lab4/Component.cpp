@@ -11,3 +11,12 @@ Component::Component() : Object()
 Component::~Component()
 {
 }
+
+void Component::beforeAttach(GameObject* gameObject)
+{
+}
+
+void Component::afterAttach(GameObject* gameObject)
+{
+
+}

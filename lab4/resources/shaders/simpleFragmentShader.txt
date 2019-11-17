@@ -1,6 +1,84 @@
 #version 330
 
-in vec3 LightIntensity;
+in vec3 FragPos; 
+in vec3 Normal;  
+in vec2 TexCoord;
+
+struct BaseLight
+{
+  	vec3 Color;
+  	float AmbientIntensity;
+  	float DiffuseIntensity;
+  	float SpecularIntensity;
+  	float SpecularPower;
+};
+
+struct Attenuation
+{
+    float Constant;
+    float Linear;
+    float Exp;
+};
+
+struct PointLight
+{
+    vec3 Position;
+    Attenuation Attenuation;
+};
+
+uniform sampler2D _Texture;
+uniform mat4 _MATRIX_MVP;
+uniform mat4 _ModelMatrix;
+uniform vec3 _WorldSpaceCameraPos;
+uniform BaseLight _BaseLight;
+uniform PointLight _PointLight;
+
+out vec4 FragColor;
+
+vec4 CalcPointLight(vec3 Normal);
+vec4 CalcLight(vec3 LightDirection, vec3 Normal);
+
 void main(){
-	gl_FragColor = vec4 (LightIntensity, 1.0);
+    
+    vec3 norm = normalize(Normal);
+    vec4 TotalLight = CalcPointLight(norm);
+
+  	FragColor = texture(_Texture, TexCoord) * TotalLight;
+}
+
+vec4 CalcPointLight(vec3 Normal)
+{
+    vec3 LightDirection = FragPos - _PointLight.Position;
+    float Distance = length(LightDirection);
+    LightDirection = normalize(LightDirection);
+
+    vec4 Color = CalcLight(LightDirection, Normal);
+    float Attenuation = _PointLight.Attenuation.Constant +
+                       	_PointLight.Attenuation.Linear * Distance +
+                        _PointLight.Attenuation.Exp * Distance * Distance;
+
+    return Color / Attenuation;
+}
+
+vec4 CalcLight(vec3 LightDirection, vec3 Normal)                   
+{                                                                                           
+    vec4 AmbientColor = vec4(_BaseLight.Color * _BaseLight.AmbientIntensity, 1.0f);
+    float DiffuseFactor = dot(Normal, -LightDirection);                                     
+                                                                                            
+    vec4 DiffuseColor  = vec4(0, 0, 0, 0);                                                  
+    vec4 SpecularColor = vec4(0, 0, 0, 0);                                                  
+                                                                                            
+    if (DiffuseFactor > 0) {                                                                
+        DiffuseColor = vec4(_BaseLight.Color * _BaseLight.DiffuseIntensity * DiffuseFactor, 1.0f);    
+                                                                                            
+        vec3 VertexToEye = normalize(_WorldSpaceCameraPos - FragPos);                             
+        vec3 LightReflect = normalize(reflect(LightDirection, Normal));                     
+        float SpecularFactor = dot(VertexToEye, LightReflect);                                      
+        if (SpecularFactor > 0) {                                                           
+            SpecularFactor = pow(SpecularFactor, _BaseLight.SpecularPower);
+            SpecularColor = vec4(_BaseLight.Color * _BaseLight.SpecularIntensity * SpecularFactor, 1.0f);
+        }                                                                                   
+    }                                                                                       
+                                                                                            
+    return (AmbientColor + DiffuseColor + SpecularColor);                                   
 }

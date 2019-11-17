@@ -14,6 +14,13 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="GameObjectManager.cpp" />
+    <ClCompile Include="MeshRenderer.cpp" />
+    <ClCompile Include="Resources.cpp" />
+    <ClCompile Include="MeshFilter.cpp" />
+    <ClCompile Include="CameraControl.cpp" />
+    <ClCompile Include="SkyBoxRenderer.cpp" />
+    <ClCompile Include="SolarSystem.cpp" />
+    <ClCompile Include="Planet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -29,6 +36,16 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="GameObjectManager.h" />
+    <ClInclude Include="MeshRenderer.h" />
+    <ClInclude Include="Resources.h" />
+    <ClInclude Include="MeshFilter.h" />
+    <ClInclude Include="CameraControl.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="SkyBoxRenderer.h" />
+    <ClInclude Include="SolarSystem.h" />
+    <ClInclude Include="Planet.h" />
+    <ClInclude Include="Utils.h" />
+    <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -76,10 +76,10 @@ void Transform::clearChildren()
 	}
 }
 
-glm::mat4 Transform::getWorldMatrix()
+glm::mat4 Transform::getModelMatrix()
 {
 	if (parent != nullptr) {
-		auto parentWorldMatrix = parent->getWorldMatrix();
+		auto parentWorldMatrix = parent->getModelMatrix();
 		auto translateMatrix = glm::translate(position);
 		auto rotationMatrix = toMat4(rotation);
 		auto scalingMatrix = scale(this->scaling);
@@ -91,6 +91,11 @@ glm::mat4 Transform::getWorldMatrix()
 		auto scalingMatrix = scale(this->scaling);
 		return translateMatrix * rotationMatrix * scalingMatrix;
 	}
+}
+
+void Transform::beforeAttach(GameObject* gameObject)
+{
+	gameObject->transform = this;
 }
 
 std::list<Transform*> Transform::roots;

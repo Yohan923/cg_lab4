@@ -106,6 +106,7 @@ void Input::onMouseWheelChanged(int wheel, int direction, int x, int y)
 	next.wheel = direction;
 }
 
+float Input::deltaTime;
 Input::InputState Input::prev;
 Input::InputState Input::curr;
 Input::InputState Input::next;

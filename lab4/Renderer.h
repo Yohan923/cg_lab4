@@ -12,7 +12,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	virtual void draw() override;
+	virtual void beforeAttach(GameObject* gameObject) override;
 
 	Material* getMaterial() { return materials.front(); }
 

@@ -9,6 +9,8 @@ public:
 	Transform();
 	~Transform();
 
+	virtual void beforeAttach(GameObject* gameObject) override;
+
 	virtual void update() override;
 	virtual void draw() override;
 
@@ -17,7 +19,7 @@ public:
 	
 	void clearChildren();
 
-	glm::mat4 getWorldMatrix();
+	glm::mat4 getModelMatrix();
 
 	glm::vec3 position;
 	glm::quat rotation;
