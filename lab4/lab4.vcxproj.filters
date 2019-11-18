@@ -45,7 +45,6 @@
     <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

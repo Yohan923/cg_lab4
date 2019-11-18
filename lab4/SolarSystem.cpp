@@ -1,7 +1,6 @@
 #include <map>
 #include <glm/gtx/quaternion.hpp>
 #include <Utils.h>
-#include <Settings.h>
 
 #include "SolarSystem.h"
 #include <Resources.h>

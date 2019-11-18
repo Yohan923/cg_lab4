@@ -20,16 +20,6 @@
 using namespace Assimp;
 using namespace std;
 
-glm::vec3 toGlmVec3(const aiVector3D &v)
-{
-	return glm::vec3(v.x, v.y, v.z);
-}
-
-glm::vec2 toGlmVec2(const aiVector3D &v)
-{
-	return glm::vec2(v.x, v.y);
-}
-
 Resources::Resources()
 {
 }

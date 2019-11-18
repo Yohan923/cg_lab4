@@ -166,7 +166,6 @@
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Resources.h" />
-    <ClInclude Include="Settings.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SkyBoxRenderer.h" />
     <ClInclude Include="SolarSystem.h" />

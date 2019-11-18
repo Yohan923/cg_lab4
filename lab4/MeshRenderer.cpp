@@ -1,7 +1,6 @@
 #include "MeshRenderer.h"
 #include <stdafx.h>
 #include <Utils.h>
-#include <Settings.h>
 
 #include <Mesh.h>
 #include <MeshFilter.h>

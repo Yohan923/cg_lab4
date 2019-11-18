@@ -1,5 +1,4 @@
 #include "SkyBoxRenderer.h"
-#include <Settings.h>
 
 #include <Material.h>
 #include <Shader.h>
