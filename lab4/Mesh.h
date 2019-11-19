@@ -16,6 +16,7 @@ enum BufferType
 	Texture,
 	Color,
 	Index,
+	Instances,
 	NumBuffers
 };
 
@@ -37,6 +38,7 @@ public:
 	void setColors(glm::vec4* value, int count);
 	void setNormals(glm::vec3* value, int count);
 	void recalculateNormals(glm::vec3* vertices, int numVertices, glm::uvec3* triangles, int numTriangles);
+	void setInstances(glm::mat4* value, int count);
 
 	void bind();
 	void bindTexture(TextureType type);
@@ -44,6 +46,7 @@ public:
 	void setTexture(GLuint id);
 
 	int numTriangles;
+	int numInstances;
 
 protected:
 	GLuint vao;

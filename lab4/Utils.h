@@ -51,6 +51,9 @@ static const char* sunFS = "resources/shaders/sunFS.txt";
 static const char* skyboxVS = "resources/shaders/skyBoxVS.txt";
 static const char* skyboxFS = "resources/shaders/skyBoxFS.txt";
 
+static const char* asteroidVS = "resources/shaders/asteroidVS.txt";
+static const char* asteroidFS = "resources/shaders/asteroidFS.txt";
+
 inline float RandomFloat(float a, float b) {
 	float random = ((float)rand()) / (float)RAND_MAX;
 	float diff = b - a;

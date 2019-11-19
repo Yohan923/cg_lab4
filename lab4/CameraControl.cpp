@@ -48,6 +48,12 @@ void CameraControl::update()
 	if (Input::getKey('d')) {
 		cameraPos += glm::normalize(glm::cross(cameraFront, glm::vec3(0.0f, 1.0f, 0.0f))) * cameraSpeed;
 	}
+	if (Input::getKey('q')) {
+		cameraPos += cameraUp * cameraSpeed;
+	}
+	if (Input::getKey('e')) {
+		cameraPos -= cameraUp * cameraSpeed;
+	}
 
 	if (Input::curr.mouseDown[GLUT_LEFT_BUTTON] && Input::prev.mouseDown[GLUT_LEFT_BUTTON])
 	{
@@ -75,7 +81,7 @@ void CameraControl::update()
 		}
 	}
 
-	const float ZoomSpeed = 150.0f * Input::deltaTime;
+	const float ZoomSpeed = 50.0f * Input::deltaTime;
 
 	if (Input::curr.wheel != 0)
 	{

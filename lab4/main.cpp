@@ -138,19 +138,19 @@ void initSkyBox()
 
 void initCamera() {
 	auto* cameraObject = new GameObject();
-	cameraObject->transform->position = glm::vec3(0, 0, 0);
+	cameraObject->transform->position = glm::vec3(0, 150, 150);
 
 	// Camera
 	auto* camera = new Camera();
 	cameraObject->addComponent(camera);
 
-	camera->cameraFront = glm::vec3(0, 0, -1);
+	camera->cameraFront = glm::vec3(0, -1, -1);
 	camera->fov = 45;
 	camera->aspect = (float)width / height;
 	camera->nearClipPlane = 0.01f;
-	camera->farClipPlane = 1000.f;
+	camera->farClipPlane = 2000.f;
 	camera->updateProjectionMatrix();
-	camera->pitch = 0;
+	camera->pitch = -45;
 	camera->yaw = -90;
 	auto* cameraController = new CameraControl();
 	cameraObject->addComponent(cameraController);
@@ -183,11 +183,11 @@ void initObjects()
 
 	initCamera();
 
+	initSolarSystem();
+
 	initSkyBox();
 
 	initAcanologia();
-
-	initSolarSystem();
 
 	previousTotalSeconds = 0;
 }

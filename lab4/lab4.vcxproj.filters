@@ -21,6 +21,7 @@
     <ClCompile Include="SkyBoxRenderer.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
     <ClCompile Include="Planet.cpp" />
+    <ClCompile Include="InstanceRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -45,6 +46,7 @@
     <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="InstanceRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

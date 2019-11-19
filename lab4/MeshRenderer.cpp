@@ -14,6 +14,10 @@
 #include <Planet.h>
 
 
+MeshRenderer::MeshRenderer() 
+{
+}
+
 MeshRenderer::MeshRenderer(const char* vsPath, const char* fsPath)
 {
 	materials.push_back(Resources::loadMaterial(vsPath, fsPath));

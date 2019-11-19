@@ -29,6 +29,7 @@ public:
 	static GLuint loadTexture(const char* path);
 	static Material* loadMaterial(const char* vsPath, const char* fsPath);
 	static GLuint loadCubemap(vector<string> faces);
+	static GameObject* loadAsteroids(const char* path, const char* vsPath, const char* fsPath);
 
 
 	static Resources *instance;

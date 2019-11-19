@@ -6,6 +6,7 @@
 class MeshRenderer : public Renderer
 {
 public:
+	MeshRenderer();
 	MeshRenderer(const char* vsPath, const char* fsPath);
 	~MeshRenderer();
 
